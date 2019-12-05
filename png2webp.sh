@@ -3,7 +3,9 @@
 basedir=`cd $(dirname $0);pwd -P`
 
 TYPE_PNG="png"
-TYPE_NAMED="@3x"
+TYPE_NAMED=""
+
+LOCAL_CWEBP_PATH="/usr/local/bin/cwebp"
 
 echo $basedir
 
@@ -19,17 +21,21 @@ printResult() {
 #png 转换为webp 
 toWebp() {
 	filePath=`echo $1 |sed 's/ /\ /g'`
-	newFilePath=`echo #{filePath%/*}$TYPE_NAMED`
 	fileName=${filePath##*/}
-	fileName=`echo $fileName|sed 's/ /_/g' |sed 's/$TYPE_NAMED//g'`
+	fileName=`echo $fileName|sed 's/ /_/g'`
 	fileName=${fileName%.*}
 
 	# 静默模式 转换时将不会打印转换日志
-    $basedir/bin/cwebp -quiet "$filePath" -o $newFilePath$fileName.webp
+	if [[ -e $LOCAL_CWEBP_PATH  ]]; then
+		echo "bendi"
+		 cwebp -quiet "$filePath" -o $newFilePath$fileName.webp
+	else  $basedir/bin/cwebp -quiet "$filePath" -o $newFilePath$fileName.webp
+	fi
+
 	#普通模式 转换指令，会逐一打印转换结果
 	#$basedir/bin/cwebp "$filePath" -o $newFilePath$fileName.webp
-
-	printResult $? "${filePath##*/}.$TYPE_PNG ☑ $newFilePath$fileName.webp"
+	echo $filePath
+	printResult $? "${filePath##*/} ☑ $newFilePath$fileName.webp"
 }
 
 # 判断文件夹是否存在，不存在则创建文件夹
